@@ -14,6 +14,8 @@ class Gun {
         this.reloadSpeed = reloadspeed;
         this.damage = damage;
         this.ammo = ammo;
+        this.pointerX = 0;
+        this.pointerY = 0;
         this.image = new Image();
         this.gunSrc = 'resources/images/' + this.name + '.png'
         this.shootSrc = 'resources/images/' + this.name + '_shoot.png'
@@ -28,25 +30,34 @@ class Gun {
         let ctx = Game.ctx;
         ctx.drawImage(this.image, this.xPosition, CANVAS_HEIGHT - this.image.height);
     }
-    async shoot(e) {
-        if (!this.isShoot && !this.isReload) {
-            if (!this.currentMag == 0) {
-                if (this.ammo >= 0) {
-                    this.fireSound.currentTime = 0;
-                    this.fireSound.play();
-                    this.currentMag--;
-                    this.isShoot = true;
-                    this.image.src = this.shootSrc;
-                    killZombie(e.clientX, e.clientY, this.damage)
-                    await new Promise(resolve => setTimeout(resolve, this.firerate));
-                    this.fireSound.pause();
-                    this.image.src = this.gunSrc;
-                    this.isShoot = false;
+    shoot() {
+        this.timer = setInterval(async () => {
+            if (!this.isShoot && !this.isReload) {
+                if (!this.currentMag == 0) {
+                    if (this.ammo >= 0) {
+                        this.fireSound.currentTime = 0;
+                        this.fireSound.play();
+                        this.currentMag--;
+                        this.isShoot = true;
+                        this.image.src = this.shootSrc;
+                        if (this.name == "shotgun") {
+                            killZombie(this.pointerX - 100, this.pointerY, this.damage)
+                            killZombie(this.pointerX + 100, this.pointerY, this.damage)
+                        }
+                        killZombie(this.pointerX, this.pointerY, this.damage)
+                        await new Promise(resolve => setTimeout(resolve, this.firerate));
+                        this.fireSound.pause();
+                        this.image.src = this.gunSrc;
+                        this.isShoot = false;
+                    }
+                } else {
+                    this.reload();
                 }
-            } else {
-                this.reload();
             }
-        }
+        }, 20)
+    }
+    release() {
+        clearInterval(this.timer);
     }
     async reload() {
         if (!this.ammo == 0 && !(this.currentMag == this.magazine)) {
@@ -66,7 +77,6 @@ class Gun {
             this.isReload = false;
         }
     }
-
 }
 class Game {
     constructor(gun) {
@@ -77,6 +87,7 @@ class Game {
     }
     start() {
         setInterval(spawnZombie, 3000);
+        setInterval(spawnBigZombie, 10000);
         this.interval = setInterval(update, 20);
     }
     stop() {
@@ -118,9 +129,10 @@ class Zombie {
         this.image.src = src;
         this.xPosition = Math.floor(Math.random() * (CANVAS_WIDTH - MAX_WIDTH));
         this.yPosition = Math.floor(Math.random() * 99) - 100;
-        this.health = Math.floor(Math.random() * 3) + 1;
+        this.health = 3;
         this.width = 50;
         this.height = 100;
+        this.name = "small"
     }
     draw(game) {
         let ctx = game.ctx;
@@ -128,7 +140,7 @@ class Zombie {
     }
     move() {
         if (this.width < MAX_WIDTH) {
-            this.yPosition += ZOMBIE_SPEED*2;
+            this.yPosition += ZOMBIE_SPEED;
             this.width += ZOMBIE_SPEED;
             this.height += ZOMBIE_SPEED * 2;
         } else {
@@ -137,9 +149,14 @@ class Zombie {
         }
     }
 }
-let handgun = new Gun("handgun", 15, 75, 1, 100, 500);
+class BigZombie extends Zombie {
+    health = 5;
+    name = "big";
+}
+let handgun = new Gun("handgun", 15, 75, 1, 300, 500);
 let shotgun = new Gun("shotgun", 8, 48, 3, 500, 1000);
-let game = new Game(handgun);
+let assault = new Gun("assault", 50, 200, 1, 100, 3000);
+let game = new Game(assault);
 let headshot = new Audio("resources/sound/headshot.mp3");
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
@@ -159,8 +176,21 @@ function spawnZombie() {
     let index = 0;
     for (var i = 0; i < number; i++) {
         if (zombieSpawned < ZOMBIE_COUNT) {
-            index = Math.floor(Math.random() * 6) + 1;
+            index = Math.floor(Math.random() * 5) + 1;
             let zombie = new Zombie("resources/images/zom" + index + ".png");
+            zombies.push(zombie);
+            zombieSpawned++;
+        } else
+            break;
+    }
+}
+function spawnBigZombie() {
+    let number = Math.floor(Math.random() * 3) + 1;
+    let index;
+    for (var i = 0; i < number; i++) {
+        if (zombieSpawned < ZOMBIE_COUNT) {
+            index = Math.floor(Math.random() * 6) + 1;
+            let zombie = new BigZombie("resources/images/bigzom" + index + ".png");
             zombies.push(zombie);
             zombieSpawned++;
         } else
@@ -182,18 +212,26 @@ function killZombie(gunX, gunY, dmg) {
         var zomHead = zombies[i].yPosition + zombies[i].height / 3;
         if (gunX < zomRight && gunX > zomLeft && gunY < zomBot && gunY > zomTop) {
             if (gunY < zomHead) {
-                zombies.splice(i, 1);
-                zombieKilled++;
-                headshot.currentTime = 0;
-                headshot.play();
-            } else {
-                zombies[i].health -= dmg;
-                if (zombies[i].health <= 0) {
+                if (zombies[i].name == "big") {
+                    doDamage(i, dmg*3)
+                }
+                else {
                     zombies.splice(i, 1);
                     zombieKilled++;
                 }
+                headshot.currentTime = 0;
+                headshot.play();
+            } else {
+                doDamage(i, dmg)
             }
         }
+    }
+}
+function doDamage(i, dmg) {
+    zombies[i].health -= dmg;
+    if (zombies[i].health <= 0) {
+        zombies.splice(i, 1);
+        zombieKilled++;
     }
 }
 function changeGun(event) {
@@ -203,11 +241,15 @@ function changeGun(event) {
             break;
         case "2":
             game.setGun(shotgun);
-            break;
+            break;  
         case "r":
             game.gun.reload();
             break;
     }
+}
+function updatePointer(e) {
+    game.gun.pointerX = e.clientX;
+    game.gun.pointerY = e.clientY;
 }
 function update() {
     game.clear();
