@@ -71,7 +71,7 @@ class Gun {
 class Game {
     constructor(gun) {
         this.gun = gun;
-        this.health = 50;
+        this.health = 10;
         this.canvas = document.getElementById("game");
         this.ctx = this.canvas.getContext("2d");
     }
@@ -128,7 +128,7 @@ class Zombie {
     }
     move() {
         if (this.width < MAX_WIDTH) {
-            this.yPosition += ZOMBIE_SPEED;
+            this.yPosition += ZOMBIE_SPEED*2;
             this.width += ZOMBIE_SPEED;
             this.height += ZOMBIE_SPEED * 2;
         } else {
@@ -137,13 +137,14 @@ class Zombie {
         }
     }
 }
-let handgun = new Gun("handgun", 15, 100, 1, 100, 500);
-let shotgun = new Gun("shotgun", 8, 50, 3, 500, 1000);
+let handgun = new Gun("handgun", 15, 75, 1, 100, 500);
+let shotgun = new Gun("shotgun", 8, 48, 3, 500, 1000);
 let game = new Game(handgun);
 let headshot = new Audio("resources/sound/headshot.mp3");
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
+zombieSound.volume = 0.5;
 
 let zombieSpawned = 0;
 let zombieKilled = 0;
