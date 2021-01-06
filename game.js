@@ -7,6 +7,17 @@ let isBlowing = false;
 let bombX = 0;
 let boom = new Image();
 boom.src = 'resources/images/boom.png'
+let pistol = new Image();
+pistol.src = 'resources/images/gun.png'
+let bullet = new Image();
+bullet.src = 'resources/images/bullet.png'
+let grenadeIcon = new Image();
+grenadeIcon.src = 'resources/images/grenadeIcon.png'
+let health = new Image();
+health.src = 'resources/images/health.png'
+let dead = new Image();
+dead.src = 'resources/images/dead.png'
+let grenade = 3;
 
 class Gun {
     constructor(name, magazine, ammo, damage, firerate, reloadspeed) {
@@ -36,16 +47,19 @@ class Gun {
         ctx.drawImage(this.image, this.xPosition, CANVAS_HEIGHT - this.image.height);
     }
     async throwNade() {
-        if (!this.isShoot && !this.isReloadS && !this.isThrowing) {
+        if (!this.isShoot && !this.isReloadS && !this.isThrowing && grenade > 0) {
+            grenade --;
             this.isThrowing = true;
             bombX = this.pointerX;
             this.image.src = 'resources/images/grenade.png'
+            pin.play()
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = 'resources/images/grenade_throw.png'
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
             this.isThrowing = false;
             await new Promise(resolve => setTimeout(resolve, 2000));
+            explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
             await new Promise(resolve => setTimeout(resolve, 700));
@@ -139,11 +153,17 @@ class Game {
         this.ctx = this.canvas.getContext("2d");
         this.ctx.font = "60px Arial";
         this.ctx.fillStyle = "white";
-        this.ctx.fillText("HP " + this.health.toFixed(0), 100, CANVAS_HEIGHT - 100);
+        this.ctx.fillText(this.health.toFixed(0), 100, CANVAS_HEIGHT - 100);
+        this.ctx.drawImage(health, 40, CANVAS_HEIGHT - 150);
         this.ctx.fillText(this.gun.currentMag, CANVAS_WIDTH - 200, CANVAS_HEIGHT - 120);
-        this.ctx.fillText("Killed " + zombieKilled, CANVAS_WIDTH - 350, 120);
+        this.ctx.drawImage(pistol, CANVAS_WIDTH - 260, CANVAS_HEIGHT - 160);
+        this.ctx.fillText(grenade, CANVAS_WIDTH - 200, CANVAS_HEIGHT - 200);
+        this.ctx.drawImage(grenadeIcon, CANVAS_WIDTH - 260, CANVAS_HEIGHT - 250);
+        this.ctx.fillText(zombieKilled, CANVAS_WIDTH - 180, 120);
+        this.ctx.drawImage(dead, CANVAS_WIDTH - 250, 70);
         this.ctx.fillStyle = "silver";
         this.ctx.fillText(this.gun.ammo, CANVAS_WIDTH - 200, CANVAS_HEIGHT - 50);
+        this.ctx.drawImage(bullet, CANVAS_WIDTH - 250, CANVAS_HEIGHT - 95);
     }
 }
 class Zombie {
@@ -188,6 +208,8 @@ let headshot = new Audio("resources/sound/headshot.mp3");
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
+let pin = new Audio("resources/sound/pin.wav");
+let explode = new Audio("resources/sound/boom.wav")
 zombieSound.volume = 0.5;
 
 let zombieSpawned = 0;
@@ -316,7 +338,6 @@ function updatePointer(e) {
 function drawExpolsion(x, game) {
     var ctx = game.ctx;
     ctx.drawImage(boom, x, CANVAS_HEIGHT / 2 - 250, 500, 500);
-    console.log("drawing")
 }
 function update() {
     game.clear();
