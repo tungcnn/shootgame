@@ -3,6 +3,10 @@ const CANVAS_HEIGHT = 700;
 const ZOMBIE_SPEED = 0.5;
 const MAX_WIDTH = 300;
 const ZOMBIE_COUNT = 200;
+let isBlowing = false;
+let bombX = 0;
+let boom = new Image();
+boom.src = 'resources/images/boom.png'
 
 class Gun {
     constructor(name, magazine, ammo, damage, firerate, reloadspeed) {
@@ -36,14 +40,12 @@ class Gun {
             this.isThrowing = true;
             bombX = this.pointerX;
             this.image.src = 'resources/images/grenade.png'
-            pin.play();
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = 'resources/images/grenade_throw.png'
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
             this.isThrowing = false;
             await new Promise(resolve => setTimeout(resolve, 2000));
-            explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
             await new Promise(resolve => setTimeout(resolve, 700));
@@ -182,16 +184,10 @@ let handgun = new Gun("handgun", 15, 75, 1, 300, 500);
 let shotgun = new Gun("shotgun", 8, 48, 3, 500, 1000);
 let assault = new Gun("assault", 50, 200, 1, 100, 3000);
 let game = new Game(handgun);
-let isBlowing = false;
-let bombX = 0;
-let boom = new Image();
-boom.src = 'resources/images/boom.png'
 let headshot = new Audio("resources/sound/headshot.mp3");
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
-let pin = new Audio("resources/sound/pin.wav");
-let explode = new Audio("resources/sound/boom.wav");
 zombieSound.volume = 0.5;
 
 let zombieSpawned = 0;
@@ -256,21 +252,21 @@ function killZombie(gunX, gunY, dmg) {
         var zomHead = zombies[i].yPosition + zombies[i].height / 3;
         if (gunX < zomRight && gunX > zomLeft && gunY < zomBot && gunY > zomTop) {
             if (gunY < zomHead) {
-                // if (zombies[i].name == "big") {
-                //     doDamage(i, dmg * 2)
-                // } else if (zombies[i].name == "boss") {
-                //     doDamage(i, dmg * 3)
-                // } else {
+                if (zombies[i].name == "big") {
+                    doDamage(i, dmg * 2)
+                } else if (zombies[i].name == "boss") {
+                    doDamage(i, dmg * 3)
+                }
+                else {
                     zombies.splice(i, 1);
                     zombieKilled++;
-                // }
+                }
                 headshot.currentTime = 0;
                 headshot.play();
             } else {
-                doDamage(i, dmg);
+                doDamage(i, dmg)
             }
         }
-        break;
     }
 }
 function blowZombie(x1, x2) {
@@ -293,7 +289,6 @@ function doDamage(i, dmg) {
         zombies.splice(i, 1);
         zombieKilled++;
     }
-    console.log("hit")
 }
 function changeGun(event) {
     switch (event.key) {
@@ -320,7 +315,8 @@ function updatePointer(e) {
 }
 function drawExpolsion(x, game) {
     var ctx = game.ctx;
-    ctx.drawImage(boom, x - 250, CANVAS_HEIGHT / 2 - 250, 500, 500);
+    ctx.drawImage(boom, x, CANVAS_HEIGHT / 2 - 250, 500, 500);
+    console.log("drawing")
 }
 function update() {
     game.clear();
