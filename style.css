@@ -11,5 +11,5 @@ body,html {
 }
 body { 
     cursor: url("resources/images/crosshair.png"), auto;
-    background
+    background-image: url('resources/images/bg.jpg');
 }
