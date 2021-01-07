@@ -2,7 +2,7 @@ const CANVAS_WIDTH = 1500;
 const CANVAS_HEIGHT = 700;
 const ZOMBIE_SPEED = 0.5;
 const MAX_WIDTH = 300;
-const ZOMBIE_COUNT = 200;
+const ZOMBIE_COUNT = 300;
 let isBlowing = false;
 let bombX = 0;
 let boom = new Image();
@@ -48,12 +48,13 @@ class Gun {
     }
     async throwNade() {
         if (!this.isShoot && !this.isReloadS && !this.isThrowing && grenade > 0) {
-            grenade --;
+            grenade--;
             this.isThrowing = true;
             bombX = this.pointerX;
             this.image.src = 'resources/images/grenade.png'
-            pin.play()
+            pin.play();
             await new Promise(resolve => setTimeout(resolve, 300));
+            fireinthehole.play();
             this.image.src = 'resources/images/grenade_throw.png'
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
@@ -77,10 +78,11 @@ class Gun {
                         this.isShoot = true;
                         this.image.src = this.shootSrc;
                         if (this.name == "shotgun") {
-                            killZombie(this.pointerX - 100, this.pointerY, this.damage)
-                            killZombie(this.pointerX + 100, this.pointerY, this.damage)
+                            killZombie(this.pointerX - 100, this.pointerY, this.damage);
+                            killZombie(this.pointerX + 100, this.pointerY, this.damage);
                         }
-                        killZombie(this.pointerX, this.pointerY, this.damage)
+                        killZombie(this.pointerX, this.pointerY, this.damage);
+                        shootBox(this.pointerX, this.pointerY);
                         await new Promise(resolve => setTimeout(resolve, this.firerate));
                         this.fireSound.pause();
                         this.image.src = this.gunSrc;
@@ -125,6 +127,7 @@ class Game {
         setInterval(spawnZombie, 3000);
         setInterval(spawnBigZombie, 15000);
         setInterval(spawnBossZombie, 20000);
+        setInterval(randomSupplyDrop, 15000);
         this.interval = setInterval(update, 20);
     }
     stop() {
@@ -171,7 +174,7 @@ class Zombie {
         this.image = new Image();
         this.image.src = src;
         this.xPosition = Math.floor(Math.random() * (CANVAS_WIDTH - MAX_WIDTH));
-        this.yPosition = Math.floor(Math.random() * 99) - 100;
+        this.yPosition = CANVAS_HEIGHT / 2 - 100;
         this.health = 3;
         this.width = 50;
         this.height = 100;
@@ -183,7 +186,6 @@ class Zombie {
     }
     move() {
         if (this.width < MAX_WIDTH) {
-            this.yPosition += ZOMBIE_SPEED;
             this.width += ZOMBIE_SPEED;
             this.height += ZOMBIE_SPEED * 2;
         } else {
@@ -195,14 +197,45 @@ class Zombie {
 class BigZombie extends Zombie {
     health = 5;
     name = "big";
+    width = 70;
+    height = 120;
 }
 class Boss extends Zombie {
     name = "boss";
     health = 50;
+    width = 100;
+    height = 200;
+}
+class SupplyBox {
+    constructor(name) {
+        this.name = name;
+        this.image = new Image();
+        this.xPosition = Math.floor(Math.random() * CANVAS_WIDTH - this.image.width) + 100;
+        this.yPosition = -100;
+        this.image.src = 'resources/images/' + this.name + '.png'
+    }
+    draw(game) {
+        let ctx = game.ctx;
+        ctx.drawImage(this.image, this.xPosition, this.yPosition);
+        this.yPosition += 1;
+    }
+    effect() {
+        switch(this.name) {
+            case "ammoBox":
+                game.gun.ammo += 20;
+                break;
+            case "healthBox":
+                game.health += 2;
+                break;
+            case "grenadeBox":
+                grenade++;
+                break;
+        }
+    }
 }
 let handgun = new Gun("handgun", 15, 75, 1, 300, 500);
-let shotgun = new Gun("shotgun", 8, 48, 3, 500, 1000);
-let assault = new Gun("assault", 50, 200, 1, 100, 3000);
+let shotgun = new Gun("shotgun", 2, 30, 3, 300, 500);
+let assault = new Gun("assault", 50, 200, 1, 100, 2000);
 let game = new Game(handgun);
 let headshot = new Audio("resources/sound/headshot.mp3");
 let eating = new Audio("resources/sound/eating.mp3");
@@ -210,12 +243,13 @@ let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
 let pin = new Audio("resources/sound/pin.wav");
 let explode = new Audio("resources/sound/boom.wav")
+let fireinthehole = new Audio('resources/sound/fireinthehole.mp3')
 zombieSound.volume = 0.5;
 
 let zombieSpawned = 0;
 let zombieKilled = 0;
 let zombies = [];
-
+let supplyList = [];
 function spawnZombie() {
     theme.loop = true;
     theme.play();
@@ -339,11 +373,39 @@ function drawExpolsion(x, game) {
     var ctx = game.ctx;
     ctx.drawImage(boom, x, CANVAS_HEIGHT / 2 - 250, 500, 500);
 }
+function randomSupplyDrop() {
+    let names = ["ammoBox", "healthBox", "grenadeBox"];
+    let number = Math.floor(Math.random() * 2) + 1;
+    for (let i = 0; i < number; i++) {
+        let index = Math.floor(Math.random() * 3)
+        let box = new SupplyBox(names[index]);
+        supplyList.push(box);
+    }
+}
+function dropSupply() {
+    for (let i = 0; i < supplyList.length; i++) {
+        supplyList[i].draw(game);
+    }
+}
+function shootBox(gunX, gunY) {
+    for (var i = 0; i < supplyList.length; i++) {
+        var boxLeft = supplyList[i].xPosition;
+        var boxRight = supplyList[i].xPosition + supplyList[i].image.width;
+        var boxTop = supplyList[i].yPosition;
+        var boxBot = supplyList[i].yPosition + supplyList[i].image.height;
+        if (gunX < boxRight && gunX > boxLeft && gunY < boxBot && gunY > boxTop) {
+            console.log("äsdas")
+            supplyList[i].effect();
+            supplyList.splice(i, 1);
+        }
+    }
+}
 function update() {
     game.clear();
     moveZombie();
     if (isBlowing)
         drawExpolsion(bombX, game);
+    dropSupply();
     game.gun.draw(game);
     game.displayHUD();
     if (game.health <= 0)
