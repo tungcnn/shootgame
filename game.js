@@ -222,7 +222,9 @@ class SupplyBox {
     effect() {
         switch(this.name) {
             case "ammoBox":
-                game.gun.ammo += 20;
+               handgun.ammo += 30;
+               shotgun.ammo += 20;
+               assault.ammo += 50;
                 break;
             case "healthBox":
                 game.health += 2;
@@ -234,7 +236,7 @@ class SupplyBox {
     }
 }
 let handgun = new Gun("handgun", 15, 75, 1, 300, 500);
-let shotgun = new Gun("shotgun", 2, 30, 3, 300, 500);
+let shotgun = new Gun("shotgun", 2, 30, 3, 400, 900);
 let assault = new Gun("assault", 50, 200, 1, 100, 2000);
 let game = new Game(handgun);
 let headshot = new Audio("resources/sound/headshot.m4a");
