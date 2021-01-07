@@ -120,8 +120,8 @@ class Game {
     constructor(gun) {
         this.gun = gun;
         this.health = 10;
-        this.canvas = document.getElementById("game");
-        this.ctx = this.canvas.getContext("2d");
+        this.canvas;
+        this.ctx;
     }
     start() {
         setInterval(spawnZombie, 3000);
@@ -237,7 +237,7 @@ let handgun = new Gun("handgun", 15, 75, 1, 300, 500);
 let shotgun = new Gun("shotgun", 2, 30, 3, 300, 500);
 let assault = new Gun("assault", 50, 200, 1, 100, 2000);
 let game = new Game(handgun);
-let headshot = new Audio("resources/sound/headshot.mp3");
+let headshot = new Audio("resources/sound/headshot.m4a");
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
@@ -394,11 +394,16 @@ function shootBox(gunX, gunY) {
         var boxTop = supplyList[i].yPosition;
         var boxBot = supplyList[i].yPosition + supplyList[i].image.height;
         if (gunX < boxRight && gunX > boxLeft && gunY < boxBot && gunY > boxTop) {
-            console.log("äsdas")
             supplyList[i].effect();
             supplyList.splice(i, 1);
         }
     }
+}
+function start() {
+    document.body.innerHTML = '<canvas id="game" width="1500" height="700" onmousedown="game.gun.shoot(event)" onmousemove="game.move(event); updatePointer(event)" onmouseup="game.gun.release()"></canvas>';
+    game.canvas = document.getElementById("game");
+    game.ctx = game.canvas.getContext("2d");
+    game.start();
 }
 function update() {
     game.clear();

@@ -3,8 +3,8 @@
     <head>
         <link rel="stylesheet" href="style.css">
     </head>
-    <body onload="game.start()" onmousedown="game.gun.shoot(event)" onmousemove="game.move(event); updatePointer(event)" onkeypress="changeGun(event)" onmouseup="game.gun.release()">
-        <canvas id="game" width="1500" height="700"></canvas>
+    <body onkeypress="changeGun(event)">
+        <button onclick="start()">Start</button>
     </body>
     <script src="game.js"></script>
 </html>

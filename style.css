@@ -1,15 +1,21 @@
 body,html {
     height: 100%;
+    background-image: url('resources/images/bg.jpg');
+    text-align: center;
 }
 #game {
     border: 1px solid black;
-    background-image: url("resources/images/bg.jfif");
+    background-image: url("resources/images/bg2.jpg");
     height: 100%;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
-}
-body { 
     cursor: url("resources/images/crosshair.png"), auto;
-    background-image: url('resources/images/bg.jpg');
+}
+button {
+    width: 400px;
+    height: 100px;
+    border-radius: 20px;
+    margin-top: 600px;
+    font-size: 60px;
 }
