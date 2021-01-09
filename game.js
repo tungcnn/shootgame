@@ -1,6 +1,6 @@
 const CANVAS_WIDTH = window.innerWidth - 100;
 const CANVAS_HEIGHT = window.innerHeight - 50;
-let zombie_count = 10;
+let zombie_count = 200;
 let wave = 1;
 let isBlowing = false;
 let bombX = 0;
@@ -467,7 +467,7 @@ function startWave2() {
     setTimeout(() => {
         document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
         zombieSpawned = 0;
-        zombie_count = 10;
+        zombie_count = 400;
     }, 5000)
 }
 function startWave3() {
