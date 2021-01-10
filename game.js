@@ -1,7 +1,6 @@
 const CANVAS_WIDTH = window.innerWidth - 100;
 const CANVAS_HEIGHT = window.innerHeight - 50;
-let zombie_count = 200;
-let wave = 1;
+let zombie_count = 10;
 let isBlowing = false;
 let bombX = 0;
 let boom = new Image();
@@ -18,7 +17,7 @@ let dead = new Image();
 dead.src = 'resources/images/dead.png'
 let zomIcon = new Image();
 zomIcon.src = 'resources/images/zomIcon.png'
-let grenade = 1;
+let grenade = 3;
 
 class Gun {
     constructor(name, magazine, ammo, damage, firerate, reloadspeed, knockback) {
@@ -125,13 +124,51 @@ class Game {
         this.health = 50;
         this.canvas;
         this.ctx;
+        this.wave = 1;
     }
     start() {
-        setInterval(spawnZombie, 3000);
-        setInterval(spawnBigZombie, 15000);
-        setInterval(spawnBossZombie, 20000);
-        setInterval(randomSupplyDrop, 15000);
+        this.smallInterval = setInterval(spawnZombie, 3000);
+        this.bigInterval = setInterval(spawnBigZombie, 15000);
+        this.bossInterval = setInterval(spawnBossZombie, 20000);
+        this.supplyInterval = setInterval(randomSupplyDrop, 15000);
         this.interval = setInterval(update, 20);
+    }
+    startWave2() {
+        roundStart.play();
+        this.wave = 2;
+        zombieKilled = 0;
+        bigZedLimit *= 1.5;
+        this.clearAllSpawn();
+        setTimeout(() => {
+            document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
+            zombieSpawned = 0;
+            zombie_count = 10;
+            this.bigInterval = setInterval(spawnBigZombie, 5000);
+            this.bossInterval = setInterval(spawnBossZombie, 20000);
+        }, 5000)
+    }
+    startWave3() {
+        theme.loop = false;
+        theme.pause();
+        roundStart.play();
+        this.wave = 3;
+        zombieKilled = 0;
+        this.clearAllSpawn();
+        bossZedLimit *= 2;
+        setTimeout(() => {
+            bossMusic.loop = true;
+            bossMusic.play();
+            document.getElementById("game").style.backgroundImage = "url('resources/images/bg4.jpg')";
+            zombieSpawned = 0;
+            zombie_count = 71;
+            spawnFinalBoss();
+            this.bossInterval = setInterval(spawnBossZombie, 10000);
+        }, 5000)
+    }
+    clearAllSpawn() {
+        clearInterval(this.smallInterval);
+        clearInterval(this.bigInterval);
+        clearInterval(this.bossInterval);
     }
     stop() {
         clearInterval(this.interval);
@@ -219,7 +256,7 @@ class Boss extends Zombie {
 }
 class FinalBoss extends Zombie {
     name = "sonmc"
-    health = 700;
+    health = 1100;
     damage = 10;
     speed = 0.2;
     width = 150;
@@ -457,34 +494,7 @@ function start() {
     game.ctx = game.canvas.getContext("2d");
     game.start();
 }
-function startWave2() {
-    roundStart.play();
-    wave = 2;
-    zombieKilled = 0;
-    smallZedLimit *= 1.5;
-    bigZedLimit *= 1.5;
-    bossZedLimit *= 1.5;
-    setTimeout(() => {
-        document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
-        zombieSpawned = 0;
-        zombie_count = 400;
-    }, 5000)
-}
-function startWave3() {
-    theme.loop = false;
-    theme.pause();
-    roundStart.play();
-    wave = 3;
-    zombieKilled = 0;
-    setTimeout(() => {
-        bossMusic.loop = true;
-        bossMusic.play();
-        document.getElementById("game").style.backgroundImage = "url('resources/images/bg4.jpg')";
-        zombieSpawned = 0;
-        zombie_count = 401;
-        spawnFinalBoss();
-    }, 5000)
-}
+
 function update() {
     game.clear();
     moveZombie();
@@ -496,10 +506,10 @@ function update() {
     if (game.health <= 0)
         game.stop();
     if (zombieKilled == zombie_count) {
-        if (wave == 1)
-            startWave2();
-        else if (wave == 2)
-            startWave3();
+        if (game.wave == 1)
+            game.startWave2();
+        else if (game.wave == 2)
+            game.startWave3();
         else
             game.win();
     }
