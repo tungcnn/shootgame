@@ -247,6 +247,9 @@ class BigZombie extends Zombie {
     height = 120;
     damage = 2;
 }
+class GasZombie extends BigZombie {
+    name = "gas";
+}
 class Boss extends Zombie {
     name = "boss";
     health = 50;
@@ -294,6 +297,7 @@ class SupplyBox {
         }
     }
 }
+
 let handgun = new Gun("handgun", 15, 75, 1, 300, 500, 3);
 let shotgun = new Gun("shotgun", 7, 28, 3, 600, 900, 30);
 let assault = new Gun("assault", 50, 50, 2, 100, 1500, 3);
