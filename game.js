@@ -87,7 +87,7 @@ class Gun {
                         shootBox(this.pointerX, this.pointerY);
                         await new Promise(resolve => setTimeout(resolve, this.firerate));
                         this.fireSound.pause();
-                        this.image.src = this.gunSrc;
+                        
                         this.isShoot = false;
                     }
                 } else {
@@ -98,6 +98,7 @@ class Gun {
     }
     release() {
         clearInterval(this.timer);
+        this.image.src = this.gunSrc;
     }
     async reload() {
         if (!this.ammo == 0 && !(this.currentMag == this.magazine)) {
