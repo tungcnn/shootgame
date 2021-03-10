@@ -43,11 +43,10 @@ class Gun {
         this.fireSound = new Audio('resources/sound/' + this.name + ".mp3");
         this.reloadSound = new Audio('resources/sound/' + this.name + "_reload.mp3");
         this.fireSound.volume = 0.5;
-        this.yPosition = CANVAS_HEIGHT - this.image.height;
     }
     draw(Game) {
         let ctx = Game.ctx;
-        ctx.drawImage(this.image, this.xPosition, this.yPosition);
+        ctx.drawImage(this.image, this.xPosition, CANVAS_HEIGHT - this.image.height);
     }
     async throwNade() {
         if (!this.isShoot && !this.isReloadS && !this.isThrowing && grenade > 0) {
@@ -86,10 +85,10 @@ class Gun {
                         }
                         killZombie(this.pointerX, this.pointerY, this.damage);
                         shootBox(this.pointerX, this.pointerY);
-                        this.yPosition -= 20;
+                        this.xPosition += 35;
                         await new Promise(resolve => setTimeout(resolve, this.firerate));
                         this.fireSound.pause();
-                        this.yPosition += 20;
+                        this.xPosition -= 35;
                         this.isShoot = false;
                     }
                 } else {
