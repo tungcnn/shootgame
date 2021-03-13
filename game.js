@@ -65,7 +65,7 @@ class Gun {
             explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
-            await new Promise(resolve => setTimeout(resolve, 700));
+            await new Promise(resolve => setTimeout(resolve, 2000));
             isBlowing = false;
         }
     }
