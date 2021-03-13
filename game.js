@@ -1,6 +1,6 @@
 const CANVAS_WIDTH = window.innerWidth - 100;
 const CANVAS_HEIGHT = window.innerHeight - 50;
-let zombie_count = 100;
+let zombie_count = 10;
 let isBlowing = false;
 let bombX = 0;
 let boom = new Image();
@@ -61,7 +61,7 @@ class Gun {
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
             this.isThrowing = false;
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            
             explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
@@ -142,9 +142,11 @@ class Game {
         bigZedLimit *= 1.5;
         this.clearAllSpawn();
         setTimeout(() => {
+            this.gun = assault;
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
             zombieSpawned = 0;
-            zombie_count = 200;
+            zombie_count = 10;
+            this.smallInterval = setInterval(spawnZombie, 5000);
             this.bigInterval = setInterval(spawnBigZombie, 5000);
             this.bossInterval = setInterval(spawnBossZombie, 20000);
         }, 5000)
@@ -158,13 +160,14 @@ class Game {
         this.clearAllSpawn();
         bossZedLimit *= 2;
         setTimeout(() => {
+            this.gun = bfg;
             bossMusic.loop = true;
             bossMusic.play();
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg4.jpg')";
             zombieSpawned = 0;
             zombie_count = 71;
             spawnFinalBoss();
-            this.bossInterval = setInterval(spawnBossZombie, 10000);
+            this.bossInterval = setInterval(spawnBossZombie, 5000);
         }, 5000)
     }
     clearAllSpawn() {
@@ -196,7 +199,7 @@ class Game {
     displayHUD() {
         this.canvas = document.getElementById("game");
         this.ctx = this.canvas.getContext("2d");
-        this.ctx.fillStyle = "black";
+        this.ctx.fillStyle = "green";
         this.ctx.fillRect(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT * 0.05, CANVAS_WIDTH * 0.8, 10);
         this.ctx.drawImage(zomIcon, CANVAS_WIDTH * 0.1 + CANVAS_WIDTH * 0.8 / zombie_count * zombieSpawned, CANVAS_HEIGHT * 0.05)
         this.ctx.font = "60px Arial";
@@ -207,8 +210,8 @@ class Game {
         this.ctx.drawImage(pistol, CANVAS_WIDTH - 160, CANVAS_HEIGHT - 160);
         this.ctx.fillText(grenade, CANVAS_WIDTH - 100, CANVAS_HEIGHT - 200);
         this.ctx.drawImage(grenadeIcon, CANVAS_WIDTH - 160, CANVAS_HEIGHT - 250);
-        this.ctx.fillText(totalZombieKilled, CANVAS_WIDTH - 80, 120);
-        this.ctx.drawImage(dead, CANVAS_WIDTH - 150, 70);
+        this.ctx.fillText(totalZombieKilled, CANVAS_WIDTH - 110, 120);
+        this.ctx.drawImage(dead, CANVAS_WIDTH - 180, 70);
         this.ctx.fillStyle = "silver";
         this.ctx.fillText(this.gun.ammo, CANVAS_WIDTH - 100, CANVAS_HEIGHT - 50);
         this.ctx.drawImage(bullet, CANVAS_WIDTH - 150, CANVAS_HEIGHT - 95);
@@ -261,7 +264,7 @@ class Boss extends Zombie {
 }
 class FinalBoss extends Zombie {
     name = "sonmc"
-    health = 1100;
+    health = 1000;
     damage = 10;
     speed = 0.2;
     width = 150;
@@ -300,11 +303,18 @@ class SupplyBox {
     }
 }
 
-let handgun = new Gun("handgun", 15, 75, 1, 300, 500, 3);
+let handgun = new Gun("handgun", 15, 75, 1, 200, 500, 3);
+handgun.fireSound.volume = 0.3;
 let shotgun = new Gun("shotgun", 7, 28, 3, 600, 900, 30);
+shotgun.fireSound.volume = 0.7;
 let assault = new Gun("assault", 50, 50, 2, 100, 1500, 3);
+assault.fireSound.volume = 0.4;
+let bfg = new Gun("bfg", 500, 0, 2, 70, 0, 5);
+bfg.fireSound.volume - 0.4;
+let sonmc = new FinalBoss("resources/images/zomboss.png");
 let game = new Game(handgun);
-let headshot = new Audio("resources/sound/headshot.m4a");
+let headshot = new Audio("resources/sound/headshot.mp3");
+headshot.volume = 0.3;
 let eating = new Audio("resources/sound/eating.mp3");
 let theme = new Audio("resources/sound/a.mp3");
 let zombieSound = new Audio("resources/sound/zombie.mp3");
@@ -314,7 +324,9 @@ let fireinthehole = new Audio('resources/sound/fireinthehole.mp3');
 let hit = new Audio('resources/sound/hit.mp3');
 let roundStart = new Audio('resources/sound/coming.mp3');
 let bossMusic = new Audio('resources/sound/boss.mp3');
-zombieSound.volume = 0.5;
+let score = new Audio('resources/sound/score.wav');
+bossMusic.volume = 0.7;
+zombieSound.volume = 0.3;
 
 let zombieSpawned = 0;
 let zombieKilled = 0;
@@ -331,7 +343,7 @@ function spawnZombie() {
     let index = 0;
     for (var i = 0; i < number; i++) {
         if (zombieSpawned < zombie_count) {
-            index = Math.floor(Math.random() * 5) + 1;
+            index = Math.floor(Math.random() * 13) + 1;
             let zombie = new Zombie("resources/images/zom" + index + ".png");
             zombies.push(zombie);
             zombieSpawned++;
@@ -344,7 +356,7 @@ function spawnBigZombie() {
     let index;
     for (var i = 0; i < number; i++) {
         if (zombieSpawned < zombie_count) {
-            index = Math.floor(Math.random() * 6) + 1;
+            index = Math.floor(Math.random() * 8) + 1;
             let zombie = new BigZombie("resources/images/bigzom" + index + ".png");
             zombies.push(zombie);
             zombieSpawned++;
@@ -357,7 +369,7 @@ function spawnBossZombie() {
     let index;
     for (var i = 0; i < number; i++) {
         if (zombieSpawned < zombie_count) {
-            index = Math.floor(Math.random() * 5) + 1;
+            index = Math.floor(Math.random() * 7) + 1;
             let zombie = new Boss("resources/images/boss" + index + ".png");
             zombies.push(zombie);
             zombieSpawned++;
@@ -366,8 +378,7 @@ function spawnBossZombie() {
     }
 }
 function spawnFinalBoss() {
-    let zombie = new FinalBoss("resources/images/zomboss.png");
-    zombies.push(zombie);
+    zombies.push(sonmc);
     zombieSpawned++;
 }
 function moveZombie() {
@@ -394,15 +405,14 @@ function killZombie(gunX, gunY, dmg) {
                     zombies.splice(i, 1);
                     zombieKilled++;
                     totalZombieKilled++;
+                    headshot.currentTime = 0;
+                    headshot.play();
                 }
                 else {
                     doDamage(i, dmg * 1.5);
                 }
-                headshot.currentTime = 0;
-                headshot.play();
             } else {
                 doDamage(i, dmg);
-                hit.play();
             }
         }
     }
@@ -420,6 +430,8 @@ function blowZombie(x1, x2) {
         if (zomRight >= x1 && zomLeft <= x2) {
             zombies[i].health -= 25;
             if (zombies[i].health <= 0) {
+                die.currentTime = 0;
+                die.play();
                 zombies.splice(i, 1);
                 i--;
                 zombieKilled++;
@@ -429,6 +441,8 @@ function blowZombie(x1, x2) {
     }
 }
 function doDamage(i, dmg) {
+    hit.currentTime = 0;
+    hit.play();
     zombies[i].health -= dmg;
     if (zombies[i].health <= 0) {
         zombies.splice(i, 1);
@@ -446,10 +460,16 @@ function changeGun(event) {
                 game.setGun(shotgun);
                 break;
             case "3":
-                game.setGun(assault);
+                if (game.wave > 1)
+                    game.setGun(assault);
+                break;
+            case "4":
+                if (game.wave > 2)
+                    game.setGun(bfg);
                 break;
             case "r":
-                game.gun.reload();
+                if (game.gun != bfg)
+                    game.gun.reload();
                 break;
             case "g":
                 game.gun.throwNade(game);
@@ -486,6 +506,7 @@ function shootBox(gunX, gunY) {
         var boxTop = supplyList[i].yPosition;
         var boxBot = supplyList[i].yPosition + supplyList[i].image.height;
         if (gunX < boxRight && gunX > boxLeft && gunY < boxBot && gunY > boxTop) {
+            score.play();
             supplyList[i].effect();
             supplyList.splice(i, 1);
         }
@@ -511,7 +532,7 @@ function update() {
     game.displayHUD();
     if (game.health <= 0)
         game.stop();
-    if (zombieKilled == zombie_count) {
+    if ((zombieKilled == zombie_count) || sonmc.health <= 0) {
         if (game.wave == 1)
             game.startWave2();
         else if (game.wave == 2)
@@ -519,4 +540,7 @@ function update() {
         else
             game.win();
     }
+}
+function showGuide() {
+    alert('Left click to shoot\n1 for Handgun\n2 for Shotgun\n3 for secret gun (wave 2)\n4 for secret gun(wave 3)\nR to reload\nG to throw nade');
 }
