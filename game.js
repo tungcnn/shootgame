@@ -1,6 +1,6 @@
 const CANVAS_WIDTH = window.innerWidth - 100;
 const CANVAS_HEIGHT = window.innerHeight - 50;
-let zombie_count = 10;
+let zombie_count = 150;
 let isBlowing = false;
 let bombX = 0;
 let boom = new Image();
@@ -61,7 +61,7 @@ class Gun {
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
             this.isThrowing = false;
-            
+
             explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
@@ -145,7 +145,7 @@ class Game {
             this.gun = assault;
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
             zombieSpawned = 0;
-            zombie_count = 10;
+            zombie_count = 100;
             this.smallInterval = setInterval(spawnZombie, 5000);
             this.bigInterval = setInterval(spawnBigZombie, 5000);
             this.bossInterval = setInterval(spawnBossZombie, 20000);
@@ -165,7 +165,7 @@ class Game {
             bossMusic.play();
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg4.jpg')";
             zombieSpawned = 0;
-            zombie_count = 71;
+            zombie_count = 10000;
             spawnFinalBoss();
             this.bossInterval = setInterval(spawnBossZombie, 5000);
         }, 5000)
@@ -199,9 +199,11 @@ class Game {
     displayHUD() {
         this.canvas = document.getElementById("game");
         this.ctx = this.canvas.getContext("2d");
-        this.ctx.fillStyle = "green";
-        this.ctx.fillRect(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT * 0.05, CANVAS_WIDTH * 0.8, 10);
-        this.ctx.drawImage(zomIcon, CANVAS_WIDTH * 0.1 + CANVAS_WIDTH * 0.8 / zombie_count * zombieSpawned, CANVAS_HEIGHT * 0.05)
+        if (game.wave != 3) {
+            this.ctx.fillStyle = "green";
+            this.ctx.fillRect(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT * 0.05, CANVAS_WIDTH * 0.8, 10);
+            this.ctx.drawImage(zomIcon, CANVAS_WIDTH * 0.1 + CANVAS_WIDTH * 0.8 / zombie_count * zombieSpawned, CANVAS_HEIGHT * 0.05)
+        }
         this.ctx.font = "60px Arial";
         this.ctx.fillStyle = "white";
         this.ctx.fillText(this.health.toFixed(0), 100, CANVAS_HEIGHT - 100);
@@ -310,7 +312,7 @@ shotgun.fireSound.volume = 0.7;
 let assault = new Gun("assault", 50, 50, 2, 100, 1500, 3);
 assault.fireSound.volume = 0.4;
 let bfg = new Gun("bfg", 500, 0, 2, 70, 0, 5);
-bfg.fireSound.volume - 0.4;
+bfg.fireSound.volume - 0.2;
 let sonmc = new FinalBoss("resources/images/zomboss.png");
 let game = new Game(handgun);
 let headshot = new Audio("resources/sound/headshot.mp3");
