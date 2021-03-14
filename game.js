@@ -145,7 +145,7 @@ class Game {
             this.gun = assault;
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
             zombieSpawned = 0;
-            zombie_count = 200;
+            zombie_count = 150;
             this.smallInterval = setInterval(spawnZombie, 5000);
             this.bigInterval = setInterval(spawnBigZombie, 5000);
             this.bossInterval = setInterval(spawnBossZombie, 20000);
@@ -330,6 +330,7 @@ let hit = new Audio('resources/sound/hit.mp3');
 let roundStart = new Audio('resources/sound/coming.mp3');
 let bossMusic = new Audio('resources/sound/boss.mp3');
 let score = new Audio('resources/sound/score.wav');
+let victory = new Audio('resources/sound/victory.mp3');
 bossMusic.volume = 0.7;
 zombieSound.volume = 0.3;
 
@@ -540,8 +541,12 @@ function update() {
             game.startWave2();
         else if (game.wave == 2)
             game.startWave3();
-        else
+        else {
             game.win();
+            bossMusic.pause();
+            victory.play();
+            zombieSound.pause();
+        }
     }
 }
 function showGuide() {
