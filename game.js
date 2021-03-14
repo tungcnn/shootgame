@@ -61,12 +61,12 @@ class Gun {
             await new Promise(resolve => setTimeout(resolve, 300));
             this.image.src = this.gunSrc;
             this.isThrowing = false;
-
             explode.play();
             isBlowing = true;
             blowZombie(bombX - 500, bombX + 500);
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            await new Promise(resolve => setTimeout(resolve, 500));
             isBlowing = false;
+            console.log("asdasd");
         }
     }
     shoot() {
@@ -145,7 +145,7 @@ class Game {
             this.gun = assault;
             document.getElementById("game").style.backgroundImage = "url('resources/images/bg3.jpg')";
             zombieSpawned = 0;
-            zombie_count = 100;
+            zombie_count = 200;
             this.smallInterval = setInterval(spawnZombie, 5000);
             this.bigInterval = setInterval(spawnBigZombie, 5000);
             this.bossInterval = setInterval(spawnBossZombie, 20000);
@@ -203,6 +203,9 @@ class Game {
             this.ctx.fillStyle = "green";
             this.ctx.fillRect(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT * 0.05, CANVAS_WIDTH * 0.8, 10);
             this.ctx.drawImage(zomIcon, CANVAS_WIDTH * 0.1 + CANVAS_WIDTH * 0.8 / zombie_count * zombieSpawned, CANVAS_HEIGHT * 0.05)
+        } else {
+            this.ctx.fillStyle = "red";
+            this.ctx.fillRect(CANVAS_WIDTH * 0.1, CANVAS_HEIGHT * 0.05, CANVAS_WIDTH * 0.8 / 1000 * sonmc.health, 30);
         }
         this.ctx.font = "60px Arial";
         this.ctx.fillStyle = "white";
@@ -432,8 +435,6 @@ function blowZombie(x1, x2) {
         if (zomRight >= x1 && zomLeft <= x2) {
             zombies[i].health -= 25;
             if (zombies[i].health <= 0) {
-                die.currentTime = 0;
-                die.play();
                 zombies.splice(i, 1);
                 i--;
                 zombieKilled++;
@@ -485,7 +486,7 @@ function updatePointer(e) {
 }
 function drawExpolsion(x, game) {
     var ctx = game.ctx;
-    ctx.drawImage(boom, x, CANVAS_HEIGHT / 2 - 250, 500, 500);
+    ctx.drawImage(boom, x - 250, CANVAS_HEIGHT / 2 - 250, 500, 500);
 }
 function randomSupplyDrop() {
     let names = ["ammoBox", "ammoBox", "healthBox", "grenadeBox"];
